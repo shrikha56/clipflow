@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --color-alloy-bg: #121212;
+  --color-alloy-panel: #161616;
+  --color-alloy-elevated: #1e1e1e;
+  --color-alloy-border: #2a2a2a;
+  --color-alloy-muted: #9ca3af;
+  --color-alloy-orange: #f97316;
+  --color-alloy-blue: #3b82f6;
+  --color-alloy-purple: #a855f7;
+  --color-alloy-green: #22c55e;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-alloy-bg);
+  color: #f3f4f6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Native controls — dark alloy inputs */
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280;
+}
