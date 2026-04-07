@@ -43,6 +43,7 @@ import {
   X,
 } from 'lucide-react'
 
+type IdeasMode = 'ideation' | 'planning'
 type MainTab = 'blocks' | 'runSheet' | 'plan'
 type BlockType = 'scene' | 'script' | 'dialogue' | 'audio' | 'props'
 
@@ -164,6 +165,7 @@ const TITLE =
   "I tracked my screen time for 7 days — here's what happened"
 
 /** Linked rows (“beats”): each row ties Hook + Content + Props together */
+const IDEATION_STORAGE_KEY = 'clipflow-ideation-notes-v1'
 const PLAN_STORAGE_KEY = 'clipflow-plan-board-v2'
 const PLAN_V1_STORAGE_KEY = 'clipflow-plan-board-v1'
 
@@ -259,6 +261,15 @@ function loadPlanBoard(): PlanBoard {
     /* ignore */
   }
   return defaultPlanBoard()
+}
+
+function loadIdeationNotes(): string {
+  if (typeof window === 'undefined') return ''
+  try {
+    return localStorage.getItem(IDEATION_STORAGE_KEY) ?? ''
+  } catch {
+    return ''
+  }
 }
 
 const inputClass =
@@ -641,11 +652,13 @@ function AudioBlock({
 }
 
 export default function App() {
+  const [ideasMode, setIdeasMode] = useState<IdeasMode>('planning')
   const [mainTab, setMainTab] = useState<MainTab>('blocks')
   const [blocks, setBlocks] = useState<Block[]>(loadInitialBlocks)
   /** Left accent bar only when user explicitly selects a block — never defaulted */
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [planBoard, setPlanBoard] = useState<PlanBoard>(loadPlanBoard)
+  const [ideationNotes, setIdeationNotes] = useState<string>(loadIdeationNotes)
 
   useEffect(() => {
     try {
@@ -654,6 +667,14 @@ export default function App() {
       /* ignore quota */
     }
   }, [planBoard])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(IDEATION_STORAGE_KEY, ideationNotes)
+    } catch {
+      /* ignore quota */
+    }
+  }, [ideationNotes])
 
   function addBlock(t: BlockType) {
     setBlocks((prev) => [...prev, createBlock(t, uid())])
@@ -846,45 +867,74 @@ export default function App() {
               <TagChip icon={Grid3x3} label="Category" />
             </div>
 
-            <div className="mb-6 flex items-center gap-2 border-b border-alloy-border pb-3">
+            <div className="mb-4 inline-flex items-center gap-1 rounded-full border border-alloy-border bg-alloy-panel p-1">
               <button
                 type="button"
-                onClick={() => setMainTab('plan')}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  mainTab === 'plan'
-                    ? 'border border-alloy-purple bg-alloy-purple/10 text-white shadow-sm shadow-alloy-purple/15'
-                    : 'border border-transparent text-zinc-500 hover:text-zinc-300'
+                onClick={() => setIdeasMode('ideation')}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  ideasMode === 'ideation'
+                    ? 'bg-alloy-purple text-white shadow-sm shadow-alloy-purple/25'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                Plan
+                Ideation
               </button>
               <button
                 type="button"
-                onClick={() => setMainTab('blocks')}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  mainTab === 'blocks'
-                    ? 'border border-alloy-purple bg-alloy-purple/10 text-white shadow-sm shadow-alloy-purple/15'
-                    : 'border border-transparent text-zinc-500 hover:text-zinc-300'
+                onClick={() => setIdeasMode('planning')}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  ideasMode === 'planning'
+                    ? 'bg-alloy-purple text-white shadow-sm shadow-alloy-purple/25'
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
-                Blocks
-              </button>
-              <button
-                type="button"
-                onClick={() => setMainTab('runSheet')}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  mainTab === 'runSheet'
-                    ? 'border border-alloy-purple bg-alloy-purple/10 text-white shadow-sm shadow-alloy-purple/15'
-                    : 'border border-transparent text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                Run Sheet
+                Planning
               </button>
             </div>
 
+            <div className={ideasMode === 'planning' ? 'block' : 'hidden'}>
+              <div className="mb-6 flex items-center gap-2 border-b border-alloy-border pb-3">
+                <button
+                  type="button"
+                  onClick={() => setMainTab('plan')}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    mainTab === 'plan'
+                      ? 'border border-alloy-purple bg-alloy-purple/10 text-white shadow-sm shadow-alloy-purple/15'
+                      : 'border border-transparent text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  Plan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMainTab('blocks')}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    mainTab === 'blocks'
+                      ? 'border border-alloy-purple bg-alloy-purple/10 text-white shadow-sm shadow-alloy-purple/15'
+                      : 'border border-transparent text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  Blocks
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMainTab('runSheet')}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    mainTab === 'runSheet'
+                      ? 'border border-alloy-purple bg-alloy-purple/10 text-white shadow-sm shadow-alloy-purple/15'
+                      : 'border border-transparent text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  Run Sheet
+                </button>
+              </div>
+            </div>
+
             <div
-              className={mainTab === 'blocks' ? 'block' : 'hidden'}
-              aria-hidden={mainTab !== 'blocks'}
+              className={
+                ideasMode === 'planning' && mainTab === 'blocks' ? 'block' : 'hidden'
+              }
+              aria-hidden={ideasMode !== 'planning' || mainTab !== 'blocks'}
             >
               {blocks.length === 0 ? (
                 <EmptyBlocks onPick={addBlock} />
@@ -999,17 +1049,32 @@ export default function App() {
             </div>
 
             <div
-              className={mainTab === 'runSheet' ? 'block' : 'hidden'}
-              aria-hidden={mainTab !== 'runSheet'}
+              className={
+                ideasMode === 'planning' && mainTab === 'runSheet' ? 'block' : 'hidden'
+              }
+              aria-hidden={ideasMode !== 'planning' || mainTab !== 'runSheet'}
             >
               <RunSheetView blocks={blocks} projectTitle={TITLE} />
             </div>
 
             <div
-              className={mainTab === 'plan' ? 'block' : 'hidden'}
-              aria-hidden={mainTab !== 'plan'}
+              className={
+                ideasMode === 'planning' && mainTab === 'plan' ? 'block' : 'hidden'
+              }
+              aria-hidden={ideasMode !== 'planning' || mainTab !== 'plan'}
             >
               <PlanBoardView plan={planBoard} setPlan={setPlanBoard} />
+            </div>
+
+            <div className={ideasMode === 'ideation' ? 'block' : 'hidden'}>
+              <div className="rounded-xl border border-alloy-border bg-alloy-panel p-4">
+                <textarea
+                  className="min-h-[340px] w-full resize-y border-0 bg-transparent text-sm leading-relaxed text-zinc-200 outline-none placeholder:text-zinc-600"
+                  placeholder="Write the outline..."
+                  value={ideationNotes}
+                  onChange={(e) => setIdeationNotes(e.target.value)}
+                />
+              </div>
             </div>
           </div>
         </main>
