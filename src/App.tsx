@@ -1067,14 +1067,12 @@ export default function App() {
             </div>
 
             <div className={ideasMode === 'ideation' ? 'block' : 'hidden'}>
-              <div className="rounded-xl border border-alloy-border bg-alloy-panel p-4">
-                <textarea
-                  className="min-h-[340px] w-full resize-y border-0 bg-transparent text-sm leading-relaxed text-zinc-200 outline-none placeholder:text-zinc-600"
-                  placeholder="Write the outline..."
-                  value={ideationNotes}
-                  onChange={(e) => setIdeationNotes(e.target.value)}
-                />
-              </div>
+              <textarea
+                className="min-h-[420px] w-full resize-none border-0 bg-transparent px-0 py-0 text-sm leading-relaxed text-zinc-200 outline-none placeholder:text-zinc-600"
+                placeholder="Write the outline..."
+                value={ideationNotes}
+                onChange={(e) => setIdeationNotes(e.target.value)}
+              />
             </div>
           </div>
         </main>
